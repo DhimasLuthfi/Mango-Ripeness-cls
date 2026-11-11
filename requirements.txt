@@ -1,7 +1,8 @@
-streamlit>=1.35.0
-ultralytics>=8.2.0
-torch>=2.0.0
-torchvision>=0.15.0
-pillow>=10.0.0
-opencv-python-headless>=4.8.0
-numpy>=1.24.0
+# Mango Ripeness Classifier - Pinned Production Dependencies
+streamlit==1.35.0
+ultralytics==8.2.32
+torch==2.3.1
+torchvision==0.18.1
+pillow==10.3.0
+opencv-python-headless==4.9.0.80
+numpy==1.26.4
