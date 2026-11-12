@@ -193,17 +193,23 @@ h1, h2, h3, .brand, .serif {
 .ms-classes-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  gap: 12px;
   list-style: none;
   padding: 0;
   margin: 0;
+  align-items: stretch;
 }
 .ms-class-item {
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 16px;
-  padding: 14px 12px;
+  padding: 16px 14px;
   box-shadow: 0 2px 10px rgba(23,64,44,.04);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 120px;
+  box-sizing: border-box;
 }
 .ms-class-item .r {
   display: flex;
@@ -226,20 +232,23 @@ h1, h2, h3, .brand, .serif {
   font-size: 0.88rem;
   line-height: 1.3;
   color: var(--ink);
+  min-height: 2.3em;
 }
 .ms-class-item small {
   color: var(--muted);
   font-size: 0.74rem;
-  line-height: 1.2;
+  line-height: 1.25;
   display: block;
   margin-top: 2px;
+  flex: 1;
 }
 .ms-class-item .m {
-  height: 4px;
+  height: 5px;
   border-radius: 9px;
   background: rgba(0,0,0,.06);
-  margin-top: 10px;
+  margin-top: 12px;
   overflow: hidden;
+  position: relative;
 }
 .ms-class-item .m i {
   display: block;
@@ -362,9 +371,6 @@ div[data-testid="stFileUploader"] section:hover {
   border-color: var(--c1) !important;
   background: var(--leaf) !important;
 }
-div[data-testid="stFileUploader"] section * {
-  color: #17402c !important;
-}
 div[data-testid="stFileUploader"] section span {
   color: #17402c !important;
   font-weight: 500 !important;
@@ -373,15 +379,25 @@ div[data-testid="stFileUploader"] section small {
   color: #5d6f64 !important;
 }
 div[data-testid="stFileUploader"] button {
-  background: var(--ink) !important;
+  background: #17402c !important;
   border-radius: 99px !important;
-  padding: 8px 22px !important;
+  padding: 10px 24px !important;
   border: 0 !important;
   font-weight: 600 !important;
   font-size: 0.88rem !important;
-}
-div[data-testid="stFileUploader"] button * {
   color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(23,64,44,0.2) !important;
+}
+div[data-testid="stFileUploader"] button,
+div[data-testid="stFileUploader"] button *,
+div[data-testid="stFileUploader"] button p,
+div[data-testid="stFileUploader"] button span,
+div[data-testid="stFileUploader"] button div {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+div[data-testid="stFileUploader"] button:hover {
+  background: #0f2d1e !important;
 }
 
 /* Action Button (.cta) */
