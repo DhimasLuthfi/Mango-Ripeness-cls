@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MangoSense – Deteksi Kematangan Mangga</title>
+<meta name="description" content="Unggah foto buah mangga dan biarkan model deep learning mengenali tingkat kematangannya.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f8f7ef; --paper:#fff; --ink:#17402c; --muted:#5d6f64; --line:#e3e8dc;
+  --leaf:#eef3e7; --leaf-2:#e4ecdc; --gold:#d4922a; --gold-dark:#b9791a;
+  --c1:#5e8c55; --c2:#d8a31f; --c3:#e8742c;
+  --serif:'DM Serif Display',Georgia,serif; --sans:'DM Sans',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,.brand,.serif{font-family:var(--serif);font-weight:400}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:8px}
+[hidden]{display:none!important}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* Header */
+header{border-bottom:1px solid var(--line);background:rgba(248,247,239,.9);position:sticky;top:0;z-index:10;backdrop-filter:blur(8px)}
+.bar{display:flex;align-items:center;justify-content:space-between;height:76px}
+.brand{display:flex;align-items:center;gap:12px;font-size:1.6rem;color:var(--ink);text-decoration:none}
+.brand svg{width:30px;height:30px}
+nav{display:flex;gap:32px}
+nav a{color:var(--muted);text-decoration:none;font-weight:500;padding:6px 0;border-bottom:2px solid transparent}
+nav a[aria-current]{color:var(--ink);font-weight:600;border-color:var(--gold)}
+nav a:hover{color:var(--ink)}
+.tag{display:none;border:1px solid var(--line);background:#fff;border-radius:99px;padding:4px 14px;font-size:.72rem;font-weight:600;letter-spacing:.1em;color:var(--muted)}
+
+/* Hero */
+main{position:relative;overflow:hidden}
+main::before,main::after{content:"";position:absolute;border-radius:50%;z-index:0;pointer-events:none}
+main::before{width:300px;height:300px;background:var(--leaf);left:-150px;bottom:60px}
+main::after{width:340px;height:340px;border:56px solid rgba(216,163,31,.12);right:-190px;top:90px}
+.hero{position:relative;z-index:1;display:grid;grid-template-columns:1.05fr 1fr;gap:64px;align-items:center;padding:72px 0 88px}
+.pill{display:inline-flex;align-items:center;gap:8px;background:var(--leaf);border:1px solid var(--leaf-2);border-radius:99px;padding:6px 16px;font-size:.74rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5a3f}
+.pill::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--gold)}
+h1{font-size:clamp(2.6rem,5.2vw,4.1rem);line-height:1.04;letter-spacing:-.015em;margin:22px 0 22px}
+h1 em{color:var(--gold);font-style:italic}
+.lead{font-size:1.12rem;color:var(--muted);max-width:30em;line-height:1.85}
+.classes-t{margin:36px 0 12px;font-size:.76rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between}
+.classes-t span:last-child{display:none}
+.classes{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;list-style:none}
+.classes li{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 2px 10px rgba(23,64,44,.04)}
+.classes .r{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--c)}
+.classes .n{font-family:var(--serif);font-size:.85rem;color:#8a978f}
+.classes b{display:block;font-size:1rem;line-height:1.3}
+.classes small{color:var(--muted);font-size:.78rem}
+.classes .m{display:none;height:4px;border-radius:9px;background:rgba(0,0,0,.06);margin-top:12px}
+.classes .m i{display:block;height:100%;border-radius:9px;background:var(--c);width:var(--w)}
+
+/* Card */
+.card{background:var(--paper);border-radius:28px;padding:32px;box-shadow:0 24px 60px -20px rgba(23,64,44,.22),0 2px 8px rgba(23,64,44,.05)}
+.card-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:22px}
+.eyebrow{font-size:.74rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-dark)}
+h2{font-size:1.75rem;line-height:1.2;margin-top:6px}
+.step{flex:none;width:36px;height:36px;border-radius:50%;background:var(--leaf);display:grid;place-items:center;font-size:.85rem;font-weight:600}
+.methods{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.method{display:flex;align-items:center;gap:12px;text-align:left;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;transition:.2s}
+.method b{display:block;font-size:.88rem;line-height:1.3}
+.method small{color:var(--muted);font-size:.75rem}
+.method:hover{border-color:var(--c1)}
+.method[aria-selected=true]{background:var(--leaf);border-color:var(--c1)}
+.lbl{display:block;font-weight:600;font-size:.92rem;margin-bottom:10px}
+.drop{border:1.5px dashed #c5d0bf;background:#fbfcf8;border-radius:18px;min-height:240px;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;transition:.2s;cursor:pointer}
+.drop:hover,.drop.over{border-color:var(--c1);background:var(--leaf)}
+.drop .ic{width:56px;height:56px;border-radius:50%;background:var(--leaf-2);display:grid;place-items:center;margin:0 auto 18px;color:#2f5a3f}
+.drop b{display:block;font-size:.98rem}
+.drop p{font-size:.85rem;color:var(--muted);margin-top:2px}
+.drop u{color:var(--gold-dark);font-weight:600;text-decoration:none}
+.chip{display:inline-block;margin-top:16px;background:var(--leaf);border-radius:99px;padding:4px 14px;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.drop.has{cursor:default;padding:14px}
+.shot{width:100%;max-height:300px;object-fit:contain;border-radius:12px;display:block;margin:0 auto}
+.link{background:none;border:0;color:var(--gold-dark);font-weight:600;font-size:.88rem;margin-top:12px;text-decoration:underline;text-underline-offset:3px}
+.cam{position:relative;border-radius:18px;overflow:hidden;background:#12281c;min-height:240px;display:grid;place-items:center}
+.cam video,.cam img{width:100%;max-height:340px;object-fit:cover;display:block}
+.cam .msg{color:#cfe0d2;padding:24px;text-align:center;font-size:.9rem}
+.cam-b{display:flex;justify-content:center;margin-top:12px}
+.btn2{display:inline-flex;align-items:center;gap:8px;background:var(--leaf);border:1px solid var(--leaf-2);border-radius:99px;padding:10px 22px;font-weight:600}
+.btn2:hover{background:var(--leaf-2)}
+.cta{width:100%;margin-top:20px;padding:17px;border:0;border-radius:14px;background:var(--ink);color:#fff;font-weight:600;font-size:1rem;transition:.2s;box-shadow:0 8px 20px -8px rgba(23,64,44,.5)}
+.cta:hover:not(:disabled){background:#0f2d1e}
+.cta:disabled{background:#dbe1da;color:#8a978f;box-shadow:none;cursor:not-allowed}
+.note{display:flex;gap:8px;justify-content:center;align-items:center;margin-top:14px;font-size:.78rem;color:var(--muted)}
+.note svg{width:14px;height:14px}
+.err{margin-top:12px;color:#a3321a;font-size:.86rem;background:#fdf0ec;border-radius:10px;padding:10px 14px}
+
+/* Hasil */
+.result{margin-top:22px;border-top:1px solid var(--line);padding-top:22px}
+.res-top{display:flex;align-items:center;gap:14px}
+.res-top .dot{width:16px;height:16px}
+.res-top h3{font-family:var(--serif);font-weight:400;font-size:1.9rem;line-height:1.1}
+.res-top span{color:var(--muted);font-size:.88rem}
+.res-tip{margin:10px 0 18px;color:var(--muted);font-size:.92rem}
+.prob{display:grid;grid-template-columns:110px 1fr 46px;gap:10px;align-items:center;font-size:.84rem;margin-top:8px}
+.prob .t{height:8px;background:var(--leaf);border-radius:9px;overflow:hidden}
+.prob .t i{display:block;height:100%;background:var(--c);border-radius:9px;transition:width .6s ease}
+.prob em{font-style:normal;text-align:right;font-weight:600}
+.demo{margin-top:14px;font-size:.76rem;color:var(--gold-dark);background:#fbf3e2;border-radius:8px;padding:6px 12px}
+
+/* Langkah */
+.steps{background:var(--leaf-2);position:relative;z-index:1}
+.steps .wrap{display:flex;align-items:center;justify-content:space-between;gap:24px;padding-top:34px;padding-bottom:34px}
+.steps h2{font-size:1.4rem;margin:0}
+.steps ol{display:flex;gap:56px;list-style:none;flex:1;justify-content:flex-end}
+.steps li{display:flex;align-items:center;gap:12px;font-weight:500;font-size:.95rem}
+.steps li span{width:34px;height:34px;border-radius:50%;background:#fff;display:grid;place-items:center;font-family:var(--serif);font-size:.85rem;color:var(--gold-dark);flex:none}
+
+/* Footer */
+footer{background:var(--ink);color:#cdddd1}
+footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:100px;font-size:.85rem}
+footer .brand{color:#fff;font-size:1.3rem}
+footer .brand svg{width:26px;height:26px}
+
+/* ===== Tablet & Mobile ===== */
+@media (max-width:960px){
+  .hero{grid-template-columns:1fr;gap:36px;padding:44px 0 56px}
+  .steps .wrap{flex-direction:column;align-items:flex-start}
+  .steps ol{justify-content:flex-start;gap:28px;flex-wrap:wrap}
+}
+@media (max-width:640px){
+  .wrap{padding:0 20px}
+  .bar{height:64px}
+  nav{display:none}
+  .tag{display:inline-block}
+  .brand{font-size:1.4rem}
+  .pill{font-size:.66rem;padding:5px 12px}
+  h1{font-size:2.5rem;margin:18px 0 16px}
+  .lead{font-size:1rem;line-height:1.75}
+  .classes-t{text-transform:none;letter-spacing:0;font-size:.95rem;color:var(--ink);font-weight:600;margin-top:28px}
+  .classes-t span:last-child{display:inline;font-size:.78rem;font-weight:400;color:var(--muted)}
+  .classes{gap:10px}
+  .classes li{padding:14px 12px}
+  .classes small{display:none}
+  .classes b{font-size:.85rem;min-height:2.2em}
+  .classes .m{display:block}
+  .card{padding:20px;border-radius:24px}
+  .card-h{margin-bottom:16px}
+  h2{font-size:1.05rem;font-family:var(--sans);font-weight:600;margin:0}
+  .eyebrow,.step{display:none}
+  .methods{background:var(--leaf);border-radius:16px;padding:6px;gap:4px;margin-bottom:18px}
+  .method{justify-content:center;border:0;background:transparent;padding:12px 8px;font-weight:600}
+  .method small{display:none}
+  .method:hover{border:0}
+  .method[aria-selected=true]{background:#fff;box-shadow:0 2px 8px rgba(23,64,44,.1)}
+  .lbl{display:none}
+  .drop{min-height:210px;padding:18px}
+  .chip{text-transform:none;letter-spacing:0;font-size:.78rem}
+  .prob{grid-template-columns:96px 1fr 42px}
+  .steps ol{flex-direction:column;gap:14px}
+  footer .wrap{flex-direction:column;text-align:center;padding-top:28px;padding-bottom:28px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="leaf" viewBox="0 0 32 32"><path d="M16 2c8 2 14 8 14 15 0 7-6 13-14 13S2 24 2 17C2 10 8 4 16 2z" fill="#e8a63a"/><path d="M9 24c4-1 8-5 13-13M14 19c-1-3 0-6 2-8M17 16c3 0 5 1 6 3" stroke="#17402c" stroke-width="1.8" fill="none" stroke-linecap="round"/></symbol>
+  <symbol id="up" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></symbol>
+  <symbol id="cam" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+  <symbol id="lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+</svg>
+
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="#deteksi"><svg><use href="#leaf"/></svg>MangoSense</a>
+    <nav aria-label="Navigasi utama">
+      <a href="#deteksi" aria-current="page">Deteksi</a>
+      <a href="#cara-kerja">Cara Kerja</a>
+      <a href="#tentang">Tentang</a>
+    </nav>
+    <span class="tag">VISKOM</span>
+  </div>
+</header>
+
+<main id="tentang">
+  <div class="wrap hero" id="deteksi">
+    <section aria-labelledby="judul">
+      <span class="pill">Teknologi AI untuk hasil panen</span>
+      <h1 id="judul">Kenali kematangan mangga dengan <em>lebih mudah.</em></h1>
+      <p class="lead">Unggah citra buah mangga dan biarkan model deep learning kami mengenali tingkat kematangannya dalam hitungan detik.</p>
+
+      <div class="classes-t"><span>Kelas yang dapat diprediksi</span><span>3 kategori</span></div>
+      <ul class="classes">
+        <li style="--c:var(--c1);--w:55%"><div class="r"><span class="dot"></span><span class="n">01</span></div><b>Mentah</b><small>Hijau &amp; keras</small><div class="m"><i></i></div></li>
+        <li style="--c:var(--c2);--w:70%"><div class="r"><span class="dot"></span><span class="n">02</span></div><b>Setengah Matang</b><small>Mulai menguning</small><div class="m"><i></i></div></li>
+        <li style="--c:var(--c3);--w:85%"><div class="r"><span class="dot"></span><span class="n">03</span></div><b>Matang</b><small>Kuning &amp; siap makan</small><div class="m"><i></i></div></li>
+      </ul>
+    </section>
+
+    <section class="card" aria-labelledby="mulai">
+      <div class="card-h">
+        <div><div class="eyebrow">Mulai deteksi</div><h2 id="mulai">Pilih metode pengambilan gambar</h2></div>
+        <span class="step">01</span>
+      </div>
+
+      <div class="methods" role="tablist" aria-label="Metode pengambilan gambar">
+        <button class="method" role="tab" id="tabUpload" aria-selected="true" aria-controls="panelUpload" type="button">
+          <svg class="i"><use href="#up"/></svg><span><b>Unggah File Citra</b><small>Dari perangkat Anda</small></span>
+        </button>
+        <button class="method" role="tab" id="tabCam" aria-selected="false" aria-controls="panelCam" type="button">
+          <svg class="i"><use href="#cam"/></svg><span><b>Ambil via Kamera</b><small>Gunakan kamera langsung</small></span>
+        </button>
+      </div>
+
+      <div id="panelUpload" role="tabpanel" aria-labelledby="tabUpload">
+        <span class="lbl" id="lblFile">Pilih foto buah mangga</span>
+        <div class="drop" id="drop" tabindex="0" role="button" aria-labelledby="lblFile">
+          <input type="file" id="file" accept="image/jpeg,image/png" hidden>
+          <div id="dropEmpty">
+            <div class="ic"><svg class="i"><use href="#up"/></svg></div>
+            <b>Tarik &amp; letakkan gambar di sini</b>
+            <p>atau <u>telusuri file</u> dari perangkat</p>
+            <span class="chip">JPG, JPEG, atau PNG · Maks. 10 MB</span>
+          </div>
+          <div id="dropFull" hidden>
+            <img class="shot" id="shot" alt="Pratinjau foto mangga yang dipilih">
+            <button class="link" id="clear" type="button">Ganti gambar</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="panelCam" role="tabpanel" aria-labelledby="tabCam" hidden>
+        <span class="lbl">Arahkan kamera ke buah mangga</span>
+        <div class="cam">
+          <video id="video" playsinline autoplay muted></video>
+          <img id="snapImg" alt="Hasil foto mangga" hidden>
+          <p class="msg" id="camMsg" hidden></p>
+        </div>
+        <div class="cam-b">
+          <button class="btn2" id="snap" type="button"><svg class="i"><use href="#cam"/></svg>Ambil Foto</button>
+          <button class="btn2" id="retake" type="button" hidden>Foto Ulang</button>
+        </div>
+      </div>
+
+      <div class="err" id="err" role="alert" hidden></div>
+      <button class="cta" id="go" type="button" disabled>Analisis Kematangan</button>
+      <p class="note"><svg class="i"><use href="#lock"/></svg>Gambar Anda diproses dengan aman dan tidak disimpan</p>
+
+      <div class="result" id="result" aria-live="polite" hidden>
+        <div class="res-top"><span class="dot" id="rDot"></span><div><span>Hasil prediksi</span><h3 id="rLabel"></h3></div></div>
+        <p class="res-tip" id="rTip"></p>
+        <div id="rBars"></div>
+        <p class="demo" id="rDemo" hidden>Mode demo: hasil ini acak. Isi <code>API_URL</code> di bagian skrip untuk memakai model Anda.</p>
+      </div>
+    </section>
+  </div>
+
+  <section class="steps" id="cara-kerja" aria-label="Cara kerja">
+    <div class="wrap">
+      <h2>Cukup tiga langkah sederhana</h2>
+      <ol>
+        <li><span>01</span>Pilih foto mangga</li>
+        <li><span>02</span>AI menganalisis citra</li>
+        <li><span>03</span>Lihat hasil kematangan</li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="brand" href="#deteksi"><svg><use href="#leaf"/></svg>MangoSense</a>
+    <span>Klasifikasi kematangan mangga berbasis deep learning.</span>
+    <span>© 2025 MangoSense</span>
+  </div>
+</footer>
+
+<script>
+/* ====== KONFIGURASI MODEL ======
+   Isi dengan endpoint backend Anda (mis. "/predict").
+   Request : POST multipart/form-data, field "file"
+   Response: { "label": "Matang", "probabilities": { "Mentah":0.05, "Setengah Matang":0.15, "Matang":0.80 } }
+   Jika dikosongkan, aplikasi berjalan dalam mode demo (hasil acak). */
+const API_URL = "";
+
+const CLASSES = [
+  {name:"Mentah", color:"var(--c1)", tip:"Buah masih hijau dan keras. Simpan beberapa hari lagi sebelum dimakan."},
+  {name:"Setengah Matang", color:"var(--c2)", tip:"Buah mulai menguning. Cocok untuk dipetik atau dibiarkan matang di suhu ruang."},
+  {name:"Matang", color:"var(--c3)", tip:"Buah berwarna kuning dan siap dimakan."}
+];
+const MAX = 10 * 1024 * 1024, OK = ["image/jpeg","image/png"];
+const $ = s => document.querySelector(s);
+let blob = null, url = null, stream = null;
+
+const drop=$("#drop"), input=$("#file"), go=$("#go"), err=$("#err"), result=$("#result");
+
+function showErr(m){ err.textContent=m; err.hidden=!m; }
+
+function setBlob(b){
+  clearBlob(true);
+  blob=b; url=URL.createObjectURL(b);
+  $("#shot").src=url; $("#snapImg").src=url;
+  $("#dropEmpty").hidden=true; $("#dropFull").hidden=false; drop.classList.add("has");
+  go.disabled=false; showErr("");
+}
+function clearBlob(keepUi){
+  if(url) URL.revokeObjectURL(url);
+  blob=null; url=null; go.disabled=true; result.hidden=true;
+  if(keepUi) return;
+  $("#dropEmpty").hidden=false; $("#dropFull").hidden=true; drop.classList.remove("has"); input.value="";
+  $("#snapImg").hidden=true; $("#video").hidden=false; $("#snap").hidden=false; $("#retake").hidden=true;
+}
+function pick(f){
+  if(!f) return;
+  if(!OK.includes(f.type)) return showErr("Format tidak didukung. Gunakan file JPG, JPEG, atau PNG.");
+  if(f.size>MAX) return showErr("Ukuran file terlalu besar. Maksimal 10 MB.");
+  setBlob(f);
+}
+
+/* Unggah & drag-drop */
+drop.addEventListener("click",e=>{ if(!blob && e.target!==input) input.click(); });
+drop.addEventListener("keydown",e=>{ if(!blob && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); input.click(); }});
+input.addEventListener("change",()=>pick(input.files[0]));
+["dragenter","dragover"].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.add("over");}));
+["dragleave","drop"].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.remove("over");}));
+drop.addEventListener("drop",e=>pick(e.dataTransfer.files[0]));
+$("#clear").addEventListener("click",e=>{ e.stopPropagation(); clearBlob(); });
+
+/* Tab metode */
+function setMode(m){
+  const up=m==="upload";
+  $("#tabUpload").setAttribute("aria-selected",up); $("#tabCam").setAttribute("aria-selected",!up);
+  $("#panelUpload").hidden=!up; $("#panelCam").hidden=up;
+  clearBlob(); showErr("");
+  up ? stopCam() : startCam();
+}
+$("#tabUpload").onclick=()=>setMode("upload");
+$("#tabCam").onclick=()=>setMode("camera");
+
+/* Kamera (butuh HTTPS atau localhost) */
+async function startCam(){
+  const msg=$("#camMsg"); msg.hidden=true; $("#video").hidden=false;
+  if(!navigator.mediaDevices?.getUserMedia){ msg.textContent="Kamera tidak tersedia di peramban ini. Gunakan opsi Unggah File."; msg.hidden=false; $("#video").hidden=true; $("#snap").hidden=true; return; }
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"},audio:false});
+    $("#video").srcObject=stream; $("#snap").hidden=false;
+  }catch{
+    msg.textContent="Kamera tidak dapat diakses. Izinkan akses kamera di peramban, atau gunakan opsi Unggah File.";
+    msg.hidden=false; $("#video").hidden=true; $("#snap").hidden=true;
+  }
+}
+function stopCam(){ stream?.getTracks().forEach(t=>t.stop()); stream=null; }
+$("#snap").onclick=()=>{
+  const v=$("#video"); if(!v.videoWidth) return;
+  const c=document.createElement("canvas"); c.width=v.videoWidth; c.height=v.videoHeight;
+  c.getContext("2d").drawImage(v,0,0);
+  c.toBlob(b=>{ setBlob(b); stopCam(); $("#video").hidden=true; $("#snapImg").hidden=false; $("#snap").hidden=true; $("#retake").hidden=false; },"image/jpeg",.92);
+};
+$("#retake").onclick=()=>{ clearBlob(); startCam(); };
+
+/* Klasifikasi */
+async function classify(b){
+  if(API_URL){
+    const fd=new FormData(); fd.append("file",b,"mangga.jpg");
+    const r=await fetch(API_URL,{method:"POST",body:fd});
+    if(!r.ok) throw new Error("Server mengembalikan status "+r.status);
+    return {...await r.json(), demo:false};
+  }
+  await new Promise(r=>setTimeout(r,900));
+  const raw=CLASSES.map(()=>Math.random()+.05), sum=raw.reduce((a,b)=>a+b);
+  const probabilities=Object.fromEntries(CLASSES.map((c,i)=>[c.name,raw[i]/sum]));
+  const label=Object.keys(probabilities).sort((a,b)=>probabilities[b]-probabilities[a])[0];
+  return {label,probabilities,demo:true};
+}
+go.addEventListener("click",async()=>{
+  if(!blob) return;
+  go.disabled=true; go.textContent="Menganalisis…"; showErr("");
+  try{
+    const res=await classify(blob), top=CLASSES.find(c=>c.name===res.label)||CLASSES[0];
+    $("#rDot").style.background=top.color; $("#rLabel").textContent=top.name; $("#rTip").textContent=top.tip;
+    $("#rBars").innerHTML=CLASSES.map(c=>{
+      const p=Math.round((res.probabilities[c.name]||0)*100);
+      return `<div class="prob" style="--c:${c.color}"><span>${c.name}</span><div class="t"><i style="width:${p}%"></i></div><em>${p}%</em></div>`;
+    }).join("");
+    $("#rDemo").hidden=!res.demo; result.hidden=false;
+    result.scrollIntoView({behavior:"smooth",block:"nearest"});
+  }catch(e){ showErr("Analisis gagal. Periksa koneksi lalu coba lagi."); }
+  go.textContent="Analisis Kematangan"; go.disabled=false;
+});
+</script>
+</body>
+</html>
